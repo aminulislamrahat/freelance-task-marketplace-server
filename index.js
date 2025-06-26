@@ -34,9 +34,28 @@ async function run () {
     })
     // get all
     app.get('/get/all/projects', async (req, res) => {
-      const result = await projectCollection.find().toArray()
+      const { sort, category } = req.query
+      const query = {}
+
+      if (category && category !== 'all') {
+        query.category = category
+      }
+
+      const sortOption = {}
+      if (sort === 'asc') {
+        sortOption.budget = 1
+      } else if (sort === 'desc') {
+        sortOption.budget = -1
+      }
+
+      const result = await projectCollection
+        .find(query)
+        .sort(sortOption)
+        .toArray()
+
       res.send(result)
     })
+
     // get recent
     app.get('/get/recent/projects', async (req, res) => {
       const result = await projectCollection
