@@ -43,16 +43,31 @@ async function run () {
 
       const sortOption = {}
       if (sort === 'asc') {
-        sortOption.budget = 1
+        sortOption.budgetNum = 1
       } else if (sort === 'desc') {
-        sortOption.budget = -1
+        sortOption.budgetNum = -1
       }
 
-      const result = await projectCollection
-        .find(query)
-        .sort(sortOption)
-        .toArray()
+      const pipeline = []
 
+      // Filter by category if needed
+      if (Object.keys(query).length > 0) {
+        pipeline.push({ $match: query })
+      }
+
+      // Add numeric version of budget
+      pipeline.push({
+        $addFields: {
+          budgetNum: { $toDouble: '$budget' }
+        }
+      })
+
+      // Apply sorting if requested
+      if (sort === 'asc' || sort === 'desc') {
+        pipeline.push({ $sort: sortOption })
+      }
+
+      const result = await projectCollection.aggregate(pipeline).toArray()
       res.send(result)
     })
 
