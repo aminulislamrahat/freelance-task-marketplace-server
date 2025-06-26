@@ -42,7 +42,7 @@ async function run () {
       const result = await projectCollection
         .find()
         .sort({ deadline: 1 })
-        .limit(6)
+        .limit(8)
         .toArray()
       res.send(result)
     })
